@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { prisma } from "../../lib/prisma.js";
+import { prisma } from "../lib/prisma.js";
 import { verifyAccessToken } from "../lib/jwt.js";
 
 export type AuthRequest = Request & {

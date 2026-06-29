@@ -15,12 +15,8 @@ export function isSmtpConfigured(): boolean {
   );
 }
 
-export function isResendConfigured(): boolean {
-  return Boolean(process.env.RESEND_API_KEY);
-}
-
 export function isEmailConfigured(): boolean {
-  return isSmtpConfigured() || isResendConfigured();
+  return isSmtpConfigured();
 }
 
 const transporter = isSmtpConfigured()
@@ -35,36 +31,8 @@ const transporter = isSmtpConfigured()
     })
   : null;
 
-async function sendViaResend(input: SendEmailInput, from: string): Promise<void> {
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from,
-      to: [input.to],
-      subject: input.subject,
-      html: input.html,
-      text: input.text,
-    }),
-  });
-
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`Resend failed: ${body}`);
-  }
-}
-
 export async function sendEmail(input: SendEmailInput): Promise<void> {
-  const from = process.env.EMAIL_FROM ?? "BolDo <onboarding@resend.dev>";
-
-  if (isResendConfigured()) {
-    await sendViaResend(input, from);
-    console.log(`📧 Email sent via Resend to ${input.to}`);
-    return;
-  }
+  const from = process.env.EMAIL_FROM ?? "BolDo <noreply@localhost>";
 
   if (transporter) {
     await transporter.sendMail({
@@ -82,7 +50,7 @@ export async function sendEmail(input: SendEmailInput): Promise<void> {
   console.log(`To: ${input.to}`);
   console.log(`Subject: ${input.subject}`);
   console.log(input.text);
-  console.log("\nAdd SMTP to backend/.env to send to any email address.\n");
+  console.log("\nAdd SMTP vars to backend/.env to send real emails.\n");
 }
 
 export function buildVerificationEmail(otp: string, email: string) {
@@ -104,5 +72,14 @@ export function buildPasswordResetEmail(rawToken: string, email: string) {
     text: `Hi,\n\nReset your password:\n${resetUrl}\n\nApp link: ${deepLink}\n\nThis link expires in 1 hour.`,
     html: `<p>Hi,</p><p>Reset your password:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>Or open in app: <code>${deepLink}</code></p><p>This link expires in 1 hour.</p>`,
     to: email,
+  };
+}
+
+export function buildTestEmail(to: string) {
+  return {
+    to,
+    subject: "BolDo test email",
+    text: "SMTP is working. BolDo backend sent this test email successfully.",
+    html: "<p>SMTP is working. BolDo backend sent this test email successfully.</p>",
   };
 }

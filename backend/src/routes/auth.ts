@@ -2,7 +2,7 @@ import { Router } from "express";
 import type { Request, Response } from "express";
 import { z } from "zod";
 
-import { prisma } from "../../lib/prisma.js";
+import { prisma } from "../lib/prisma.js";
 import {
   buildPasswordResetEmail,
   buildVerificationEmail,

@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "setup:email": "node scripts/email.mjs",
+    "test:email": "node scripts/email.mjs test"
   },
   "keywords": [],
   "author": "",
