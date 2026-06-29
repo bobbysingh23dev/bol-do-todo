@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/auth.js";
 import taskRoutes from "./routes/task.routes.js";
 import testEmailRoutes from "./routes/test-email.routes.js";
+import swaggerRoutes from "./routes/swagger.routes.js";
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.get("/api/health", (_req: Request, res: Response) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/test-email", testEmailRoutes);
+app.use("/api/docs", swaggerRoutes);
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ message: "Route not found" });
