@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
+import { VoiceNoteRecorder } from '@/components/voice-note-recorder';
 import { ThemedView } from '@/components/themed-view';
 import { getApiBaseUrl } from '@/constants/api';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
@@ -117,12 +118,20 @@ export default function CreateTaskScreen() {
           <View style={styles.header}>
             <ThemedText type="subtitle">Add Task</ThemedText>
             <ThemedText themeColor="textSecondary">
-              Manual create for Week 1. Voice + AI comes next.
+              Manual create or record a voice note.
             </ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
               API: {getApiBaseUrl()}
             </ThemedText>
           </View>
+
+          <VoiceNoteRecorder
+            title={form.title.trim() || undefined}
+            onSaved={(taskId) => {
+              setForm(emptyForm);
+              router.push(`/task/${taskId}`);
+            }}
+          />
 
           <Pressable onPress={fillSample} style={styles.sampleButton}>
             <ThemedText type="linkPrimary">Fill sample: Rahul payment reminder</ThemedText>

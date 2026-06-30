@@ -49,6 +49,12 @@ export function TaskCard({ task }: TaskCardProps) {
           Due: {task.dueDateText}
         </ThemedText>
       ) : null}
+
+      {task.audioPath ? (
+        <ThemedText type="small" themeColor="textSecondary">
+          Voice note attached
+        </ThemedText>
+      ) : null}
     </View>
   );
 }

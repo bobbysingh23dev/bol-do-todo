@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } fro
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 
 import { formatAmount } from '@/components/task-card';
+import { TaskAudioPlayer } from '@/components/task-audio-player';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
@@ -106,6 +107,8 @@ export default function TaskDetailScreen() {
         {amount ? <DetailRow label="Amount" value={amount} /> : null}
         {task.dueDateText ? <DetailRow label="Due" value={task.dueDateText} /> : null}
         {task.type ? <DetailRow label="Type" value={task.type} /> : null}
+
+        {task.audioPath ? <TaskAudioPlayer taskId={task.id} /> : null}
 
         {task.sourceText ? (
           <ThemedView type="backgroundElement" style={styles.block}>

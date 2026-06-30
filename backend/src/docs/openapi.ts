@@ -462,6 +462,71 @@ export const openApiSpec = {
         },
       },
     },
+    "/api/tasks/voice": {
+      post: {
+        tags: ["Tasks"],
+        summary: "Create task from voice recording",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "multipart/form-data": {
+              schema: {
+                type: "object",
+                required: ["audio"],
+                properties: {
+                  audio: {
+                    type: "string",
+                    format: "binary",
+                    description: "Audio file (m4a/mp4)",
+                  },
+                  title: {
+                    type: "string",
+                    description: "Optional title (defaults to Voice note)",
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "Task created with audioPath",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Task" },
+              },
+            },
+          },
+          "400": { description: "Missing audio or invalid file" },
+          "401": { description: "Unauthorized" },
+        },
+      },
+    },
+    "/api/tasks/{id}/audio": {
+      get: {
+        tags: ["Tasks"],
+        summary: "Stream task voice recording",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Audio file stream",
+            content: {
+              "audio/mp4": { schema: { type: "string", format: "binary" } },
+            },
+          },
+          "404": { description: "Task or audio not found" },
+        },
+      },
+    },
     "/api/tasks/{id}": {
       get: {
         tags: ["Tasks"],

@@ -35,6 +35,29 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/test-email", testEmailRoutes);
 app.use("/api/docs", swaggerRoutes);
 
+app.use(
+  (
+    err: unknown,
+    _req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    if (err && typeof err === "object" && "name" in err && err.name === "MulterError") {
+      const message =
+        "message" in err && typeof err.message === "string"
+          ? err.message
+          : "Upload failed";
+      return res.status(400).json({ message });
+    }
+
+    if (err instanceof Error && err.message === "Only audio files are allowed") {
+      return res.status(400).json({ message: err.message });
+    }
+
+    return next(err);
+  },
+);
+
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ message: "Route not found" });
 });

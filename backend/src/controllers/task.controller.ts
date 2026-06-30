@@ -1,7 +1,85 @@
 import type { Response } from "express";
+import fs from "node:fs";
+import path from "node:path";
 
 import { prisma } from "../lib/prisma.js";
+import {
+  getRelativeAudioPath,
+  resolveAudioPath,
+} from "../middleware/audio-upload.js";
 import type { AuthRequest } from "../middleware/auth.js";
+
+export async function createTaskFromVoice(req: AuthRequest, res: Response) {
+  try {
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ message: "Audio file is required" });
+    }
+
+    const title =
+      typeof req.body.title === "string" && req.body.title.trim()
+        ? req.body.title.trim()
+        : "Voice note";
+
+    const relativePath = getRelativeAudioPath(req, file.filename);
+
+    const task = await prisma.task.create({
+      data: {
+        userId: req.user!.id,
+        title,
+        type: "voice",
+        audioPath: relativePath,
+        status: "pending",
+      },
+    });
+
+    return res.status(201).json(task);
+  } catch (error) {
+    console.error("Create voice task error:", error);
+    return res.status(500).json({ message: "Failed to save voice note" });
+  }
+}
+
+export async function streamTaskAudio(req: AuthRequest, res: Response) {
+  try {
+    const { id } = req.params;
+
+    if (typeof id !== "string") {
+      return res.status(400).json({ message: "Invalid task id" });
+    }
+
+    const task = await prisma.task.findFirst({
+      where: { id, userId: req.user!.id },
+    });
+
+    if (!task?.audioPath) {
+      return res.status(404).json({ message: "Audio not found" });
+    }
+
+    const absolutePath = resolveAudioPath(task.audioPath);
+
+    if (!fs.existsSync(absolutePath)) {
+      return res.status(404).json({ message: "Audio file missing" });
+    }
+
+    const ext = path.extname(absolutePath).toLowerCase();
+    const contentType =
+      ext === ".mp3"
+        ? "audio/mpeg"
+        : ext === ".wav"
+          ? "audio/wav"
+          : ext === ".webm"
+            ? "audio/webm"
+            : "audio/mp4";
+
+    res.setHeader("Content-Type", contentType);
+    return res.sendFile(absolutePath);
+  } catch (error) {
+    console.error("Stream task audio error:", error);
+    return res.status(500).json({ message: "Failed to stream audio" });
+  }
+}
 
 export async function createTask(req: AuthRequest, res: Response) {
   try {
